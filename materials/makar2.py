@@ -32,6 +32,7 @@ def get_page(content):
             padding: 20px;
             max-width: 800px;
             margin: 20px auto;
+            text-align: center;
         }}
         .btn {{
             background-color: #28a745;
@@ -40,13 +41,19 @@ def get_page(content):
             border-radius: 5px;
             text-decoration: none;
             display: inline-block;
-            margin-top: 10px;
+            margin: 10px 5px;
+        }}
+        .btn-secondary {{
+            background-color: #6c757d;
+        }}
+        .btn-container {{
+            margin-top: 20px;
         }}
     </style>
 </head>
 <body>
     <div class="navbar">
-        <a href="/">Главная</a>
+        <a href="/">Учебные проекты</a>
         <div>
             <a href="/">Главная</a>
             <a href="/about">О проекте</a>
@@ -67,7 +74,15 @@ def home():
     content = """
     <h1>Онлайн-платформа для управления учебными проектами</h1>
     <p>Упрощаем процесс управления проектами для студентов и преподавателей.</p>
-    <a href="/about" class="btn">Узнать больше</a>
+
+    <div class="btn-container">
+        <a href="/login" class="btn">Войти</a>
+        <a href="/register" class="btn btn-secondary">Зарегистрироваться</a>
+    </div>
+
+    <div style="margin-top: 30px;">
+        <a href="/about" class="btn">Узнать больше о проекте</a>
+    </div>
     """
     return get_page(content)
 
@@ -79,12 +94,62 @@ def about():
     <p>Проект разработал Кузнецов Макар.</p>
     <p>Проект нужен для автоматизации процесса управления учебными проектами в образовательных учреждениях.</p>
     <p>Основные функции:</p>
-    <ul>
+    <ul style="text-align: left; max-width: 600px; margin: 0 auto;">
         <li>Создание и отслеживание проектов</li>
         <li>Распределение задач между участниками</li>
         <li>Контроль сроков выполнения</li>
     </ul>
-    <a href="/" class="btn">На главную</a>
+    <div style="margin-top: 20px;">
+        <a href="/" class="btn">На главную</a>
+    </div>
+    """
+    return get_page(content)
+
+
+@app.route('/login')
+def login():
+    content = """
+    <h1>Вход в систему</h1>
+    <form style="max-width: 400px; margin: 0 auto; text-align: left;">
+        <div style="margin-bottom: 15px;">
+            <label for="email">Email:</label><br>
+            <input type="email" id="email" style="width: 100%; padding: 8px;">
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label for="password">Пароль:</label><br>
+            <input type="password" id="password" style="width: 100%; padding: 8px;">
+        </div>
+        <button type="submit" class="btn" style="width: 100%;">Войти</button>
+    </form>
+    <div style="margin-top: 20px;">
+        <a href="/" class="btn btn-secondary">На главную</a>
+    </div>
+    """
+    return get_page(content)
+
+
+@app.route('/register')
+def register():
+    content = """
+    <h1>Регистрация</h1>
+    <form style="max-width: 400px; margin: 0 auto; text-align: left;">
+        <div style="margin-bottom: 15px;">
+            <label for="name">Имя:</label><br>
+            <input type="text" id="name" style="width: 100%; padding: 8px;">
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label for="email">Email:</label><br>
+            <input type="email" id="email" style="width: 100%; padding: 8px;">
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label for="password">Пароль:</label><br>
+            <input type="password" id="password" style="width: 100%; padding: 8px;">
+        </div>
+        <button type="submit" class="btn" style="width: 100%;">Зарегистрироваться</button>
+    </form>
+    <div style="margin-top: 20px;">
+        <a href="/" class="btn btn-secondary">На главную</a>
+    </div>
     """
     return get_page(content)
 
