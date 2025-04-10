@@ -1,6 +1,15 @@
-from flask import Flask
+from flask import Flask, request, redirect, url_for
+import os
 
 app = Flask(__name__)
+
+# Путь к файлу с пользователями
+USERS_FILE = 'users.txt'
+
+# Создаем файл, если его нет
+if not os.path.exists(USERS_FILE):
+    with open(USERS_FILE, 'w') as f:
+        f.write('')
 
 
 def get_page(content):
@@ -49,6 +58,17 @@ def get_page(content):
         .btn-container {{
             margin-top: 20px;
         }}
+        .alert {{
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+        }}
+        .alert-success {{
+            color: #3c763d;
+            background-color: #dff0d8;
+            border-color: #d6e9c6;
+        }}
     </style>
 </head>
 <body>
@@ -67,6 +87,23 @@ def get_page(content):
 </body>
 </html>
 """
+
+
+def save_user(name, email, password):
+    with open(USERS_FILE, 'a') as f:
+        f.write(f"{name},{email},{password}\n")
+
+
+def user_exists(email):
+    """Проверяет, существует ли пользователь с таким email"""
+    if not os.path.exists(USERS_FILE):
+        return False
+
+    with open(USERS_FILE, 'r') as f:
+        for line in f:
+            if line.strip() and line.split(',')[1] == email:
+                return True
+    return False
 
 
 @app.route('/')
@@ -106,18 +143,22 @@ def about():
     return get_page(content)
 
 
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
+    if request.method == 'POST':
+        # Здесь можно добавить обработку входа
+        return redirect(url_for('home'))
+
     content = """
     <h1>Вход в систему</h1>
-    <form style="max-width: 400px; margin: 0 auto; text-align: left;">
+    <form method="POST" style="max-width: 400px; margin: 0 auto; text-align: left;">
         <div style="margin-bottom: 15px;">
             <label for="email">Email:</label><br>
-            <input type="email" id="email" style="width: 100%; padding: 8px;">
+            <input type="email" id="email" name="email" style="width: 100%; padding: 8px;" required>
         </div>
         <div style="margin-bottom: 15px;">
             <label for="password">Пароль:</label><br>
-            <input type="password" id="password" style="width: 100%; padding: 8px;">
+            <input type="password" id="password" name="password" style="width: 100%; padding: 8px;" required>
         </div>
         <button type="submit" class="btn" style="width: 100%;">Войти</button>
     </form>
@@ -128,22 +169,36 @@ def login():
     return get_page(content)
 
 
-@app.route('/register')
+@app.route('/register', methods=['GET', 'POST'])
 def register():
-    content = """
+    message = ''
+    if request.method == 'POST':
+        name = request.form['name']
+        email = request.form['email']
+        password = request.form['password']
+
+        if user_exists(email):
+            message = '<div class="alert">Пользователь с таким email уже зарегистрирован!</div>'
+        else:
+            save_user(name, email, password)
+            message = f'<div class="alert alert-success">Пользователь {name} успешно зарегистрирован!</div>'
+            return redirect(url_for('login'))
+
+    content = f"""
     <h1>Регистрация</h1>
-    <form style="max-width: 400px; margin: 0 auto; text-align: left;">
+    {message}
+    <form method="POST" style="max-width: 400px; margin: 0 auto; text-align: left;">
         <div style="margin-bottom: 15px;">
             <label for="name">Имя:</label><br>
-            <input type="text" id="name" style="width: 100%; padding: 8px;">
+            <input type="text" id="name" name="name" style="width: 100%; padding: 8px;" required>
         </div>
         <div style="margin-bottom: 15px;">
             <label for="email">Email:</label><br>
-            <input type="email" id="email" style="width: 100%; padding: 8px;">
+            <input type="email" id="email" name="email" style="width: 100%; padding: 8px;" required>
         </div>
         <div style="margin-bottom: 15px;">
             <label for="password">Пароль:</label><br>
-            <input type="password" id="password" style="width: 100%; padding: 8px;">
+            <input type="password" id="password" name="password" style="width: 100%; padding: 8px;" required>
         </div>
         <button type="submit" class="btn" style="width: 100%;">Зарегистрироваться</button>
     </form>
