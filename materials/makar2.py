@@ -97,6 +97,16 @@ def get_page(content):
             color: white;
             margin-right: 15px;
         }}
+        .project-card {{
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            text-align: left;
+        }}
+        .project-actions {{
+            margin-top: 10px;
+        }}
     </style>
 </head>
 <body>
@@ -104,7 +114,7 @@ def get_page(content):
         <a href="/">Учебные проекты</a>
         <div>
             {'<span class="user-info">' + session.get('user_name', '') + '</span>' if 'user_email' in session else ''}
-            <a href="/">Главная</a>
+            {'<a href="/my-projects">Мои проекты</a>' if 'user_email' in session else ''}
             <a href="/about">О проекте</a>
             {'<a href="/logout">Выйти</a>' if 'user_email' in session else '<a href="/login">Войти</a>'}
         </div>
@@ -154,9 +164,51 @@ def authenticate_user(email, password):
 
 
 def save_project(title, description, author_email):
-    """Сохраняет проект в файл"""
+    """Сохраняет проект в файл и возвращает ID проекта"""
+    project_id = str(len(open(PROJECTS_FILE).readlines()) + 1)
     with open(PROJECTS_FILE, 'a') as f:
-        f.write(f"{title}|{description}|{author_email}\n")
+        f.write(f"{project_id}|{title}|{description}|{author_email}\n")
+    return project_id
+
+
+def get_user_projects(email):
+    """Получает проекты пользователя из файла"""
+    projects = []
+    if os.path.exists(PROJECTS_FILE):
+        with open(PROJECTS_FILE, 'r') as f:
+            for line in f:
+                if line.strip():
+                    parts = line.strip().split('|')
+                    if len(parts) >= 4 and parts[3] == email:
+                        projects.append({
+                            'id': parts[0],
+                            'title': parts[1],
+                            'description': parts[2]
+                        })
+    return projects
+
+
+def delete_project(project_id, user_email):
+    """Удаляет проект пользователя"""
+    if not os.path.exists(PROJECTS_FILE):
+        return False
+
+    lines = []
+    deleted = False
+    with open(PROJECTS_FILE, 'r') as f:
+        for line in f:
+            if line.strip():
+                parts = line.strip().split('|')
+                if len(parts) >= 4 and parts[0] == project_id and parts[3] == user_email:
+                    deleted = True
+                else:
+                    lines.append(line)
+
+    if deleted:
+        with open(PROJECTS_FILE, 'w') as f:
+            f.writelines(lines)
+
+    return deleted
 
 
 @app.route('/')
@@ -168,6 +220,7 @@ def home():
 
         <div class="btn-container">
             <a href="/new-project" class="btn">Новый проект</a>
+            <a href="/my-projects" class="btn btn-secondary">Мои проекты</a>
         </div>
         """
     else:
@@ -309,8 +362,7 @@ def new_project():
 
         if title and description:
             save_project(title, description, session['user_email'])
-            message = '<div class="alert alert-success">Проект успешно создан!</div>'
-            # Можно перенаправить на страницу проекта или оставить на этой странице
+            return redirect(url_for('project_created'))
         else:
             message = '<div class="alert alert-danger">Заполните все поля!</div>'
 
@@ -330,6 +382,149 @@ def new_project():
     </form>
     <div style="margin-top: 20px;">
         <a href="/" class="btn btn-secondary">На главную</a>
+    </div>
+    """
+    return get_page(content)
+
+
+@app.route('/project-created')
+def project_created():
+    if 'user_email' not in session:
+        return redirect(url_for('login'))
+
+    content = """
+    <h1>Проект успешно создан!</h1>
+    <div class="alert alert-success">
+        Ваш проект был сохранен в системе. Теперь вы можете:
+    </div>
+
+    <div class="btn-container">
+        <a href="/my-projects" class="btn">Посмотреть мои проекты</a>
+        <a href="/new-project" class="btn">Создать еще один проект</a>
+    </div>
+    """
+    return get_page(content)
+
+
+@app.route('/my-projects')
+def my_projects():
+    if 'user_email' not in session:
+        return redirect(url_for('login'))
+
+    projects = get_user_projects(session['user_email'])
+    projects_html = ""
+
+    for project in projects:
+        projects_html += f"""
+        <div class="project-card">
+            <h3>{project['title']}</h3>
+            <p>{project['description']}</p>
+            <div class="project-actions">
+                <a href="/edit-project/{project['id']}" class="btn">Редактировать</a>
+                <a href="/delete-project/{project['id']}" class="btn btn-danger">Удалить</a>
+            </div>
+        </div>
+        """
+
+    content = f"""
+    <h1>Мои проекты</h1>
+    {projects_html if projects else '<p>У вас пока нет проектов</p>'}
+    <div class="btn-container">
+        <a href="/new-project" class="btn">Создать новый проект</a>
+        <a href="/" class="btn btn-secondary">На главную</a>
+    </div>
+    """
+    return get_page(content)
+
+
+@app.route('/delete-project/<project_id>')
+def delete_project(project_id):
+    if 'user_email' not in session:
+        return redirect(url_for('login'))
+
+    if delete_project(project_id, session['user_email']):
+        message = '<div class="alert alert-success">Проект успешно удален!</div>'
+    else:
+        message = '<div class="alert alert-danger">Не удалось удалить проект</div>'
+
+    content = f"""
+    <h1>Удаление проекта</h1>
+    {message}
+    <div class="btn-container">
+        <a href="/my-projects" class="btn">Вернуться к моим проектам</a>
+        <a href="/" class="btn btn-secondary">На главную</a>
+    </div>
+    """
+    return get_page(content)
+
+
+@app.route('/edit-project/<project_id>', methods=['GET', 'POST'])
+def edit_project(project_id):
+    if 'user_email' not in session:
+        return redirect(url_for('login'))
+
+    # Находим проект
+    project = None
+    if os.path.exists(PROJECTS_FILE):
+        with open(PROJECTS_FILE, 'r') as f:
+            for line in f:
+                if line.strip():
+                    parts = line.strip().split('|')
+                    if len(parts) >= 4 and parts[0] == project_id and parts[3] == session['user_email']:
+                        project = {
+                            'id': parts[0],
+                            'title': parts[1],
+                            'description': parts[2]
+                        }
+                        break
+
+    if not project:
+        return redirect(url_for('my_projects'))
+
+    message = ''
+    if request.method == 'POST':
+        title = request.form['title']
+        description = request.form['description']
+
+        if title and description:
+            # Обновляем проект
+            lines = []
+            updated = False
+            with open(PROJECTS_FILE, 'r') as f:
+                for line in f:
+                    if line.strip():
+                        parts = line.strip().split('|')
+                        if len(parts) >= 4 and parts[0] == project_id and parts[3] == session['user_email']:
+                            lines.append(f"{project_id}|{title}|{description}|{session['user_email']}\n")
+                            updated = True
+                        else:
+                            lines.append(line)
+
+            if updated:
+                with open(PROJECTS_FILE, 'w') as f:
+                    f.writelines(lines)
+                return redirect(url_for('my_projects'))
+            else:
+                message = '<div class="alert alert-danger">Не удалось обновить проект</div>'
+        else:
+            message = '<div class="alert alert-danger">Заполните все поля!</div>'
+
+    content = f"""
+    <h1>Редактирование проекта</h1>
+    {message}
+    <form method="POST">
+        <div style="margin-bottom: 15px;">
+            <label for="title">Название проекта:</label><br>
+            <input type="text" id="title" name="title" value="{project['title']}" required>
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label for="description">Описание проекта:</label><br>
+            <textarea id="description" name="description" rows="4" required>{project['description']}</textarea>
+        </div>
+        <button type="submit" class="btn">Сохранить изменения</button>
+    </form>
+    <div style="margin-top: 20px;">
+        <a href="/my-projects" class="btn btn-secondary">Отмена</a>
     </div>
     """
     return get_page(content)
