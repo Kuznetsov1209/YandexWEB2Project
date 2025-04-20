@@ -6,8 +6,8 @@ app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'  # Необходимо для работы сессий
 
 # Пути к файлам
-USERS_FILE = 'users.txt'
-PROJECTS_FILE = 'projects.txt'
+USERS_FILE = 'data/users.txt'
+PROJECTS_FILE = 'data/projects.txt'
 
 # Создаем файлы, если их нет
 for file in [USERS_FILE, PROJECTS_FILE]:
