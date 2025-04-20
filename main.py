@@ -4,7 +4,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'  # Необходимо для работы сессий
-
+port = int(os.environ.get("PORT", 3000))
 # Пути к файлам
 USERS_FILE = 'data/users.txt'
 PROJECTS_FILE = 'data/projects.txt'
@@ -531,4 +531,4 @@ def edit_project(project_id):
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=port)
