@@ -1,1 +1,0 @@
-# YandexWEB2Project

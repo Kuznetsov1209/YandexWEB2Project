@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Онлайн-платформа для управления учебными проектами</title>
+    <style>
+        /* Общие стили */
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+
+        /* Навигационная панель */
+        .navbar {
+            background-color: #007bff;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-brand {
+            color: white;
+            font-size: 1.5rem;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .navbar-nav {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-item {
+            margin-left: 20px;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            font-size: 1rem;
+        }
+
+        .nav-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Основной контент */
+        .hero-section {
+            background-color: #007bff;
+            color: white;
+            padding: 100px 20px;
+            text-align: center;
+        }
+
+        .hero-section h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        .hero-section p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+        }
+
+        .btn-custom {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            margin: 0 10px;
+            font-size: 1rem;
+            display: inline-block;
+        }
+
+        .btn-custom:hover {
+            background-color: #218838;
+        }
+
+        /* Стиль для сообщения */
+        .about-message {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f1f1f1;
+            border-radius: 5px;
+            color: #333;
+            display: none; /* Скрыто по умолчанию */
+        }
+
+        /* Показываем сообщение, когда оно становится целевым */
+        .about-message:target {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Навигационная панель -->
+    <nav class="navbar">
+        <a href="#" class="navbar-brand">Учебные проекты</a>
+        <ul class="navbar-nav">
+            <li class="nav-item"><a href="#" class="nav-link">Главная</a></li>
+            <li class="nav-item"><a href="#about-message" class="nav-link">О проекте</a></li>
+            <li class="nav-item"><a href="#" class="nav-link">Контакты</a></li>
+        </ul>
+    </nav>
+
+    <!-- Основной контент -->
+    <section class="hero-section">
+        <h1>Онлайн-платформа для управления учебными проектами</h1>
+        <p>Упрощаем процесс управления проектами для студентов и преподавателей.</p>
+        <div>
+            <a href="#" class="btn-custom">Войти</a>
+            <a href="#" class="btn-custom">Зарегистрироваться</a>
+        </div>
+    </section>
+
+    <!-- Сообщение о проекте -->
+    <div id="about-message" class="about-message">
+        Проект разработал Кузнецов Макар. Проект нужен для упрощения управления учебными проектами в Лицее Академии Яндекса.
+    </div>
+
+</body>
+</html>
