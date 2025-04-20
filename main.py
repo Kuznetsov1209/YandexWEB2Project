@@ -159,7 +159,7 @@ def authenticate_user(email, password):
                 parts = line.strip().split(',')
                 if len(parts) >= 3 and parts[1] == email:
                     if check_password_hash(parts[2], password):
-                        return parts[0]  # Возвращаем имя пользователя
+                        return parts[0]  # Возвращаем имя  пользователя
     return False
 
 
