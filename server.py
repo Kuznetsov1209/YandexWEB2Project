@@ -119,7 +119,6 @@ def get_page(content):
             {'<a href="/logout">Выйти</a>' if 'user_email' in session else '<a href="/login">Войти</a>'}
         </div>
     </div>
-
     <div class="content">
         {content}
     </div>
