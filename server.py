@@ -1,15 +1,18 @@
+# -*- coding: utf-8 -*-
 from flask import Flask, request, redirect, url_for, session
 import os
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key_here'  # Необходимо для работы сессий
+app.secret_key = 'your_secret_key_here'
 port = int(os.environ.get("PORT", 3000))
+
 # Пути к файлам
 USERS_FILE = 'data/users.txt'
 PROJECTS_FILE = 'data/projects.txt'
 
 # Создаем файлы, если их нет
+os.makedirs('data', exist_ok=True)
 for file in [USERS_FILE, PROJECTS_FILE]:
     if not os.path.exists(file):
         with open(file, 'w') as f:
@@ -62,6 +65,10 @@ def get_page(content):
         .btn-danger {{
             background-color: #dc3545;
         }}
+        .btn-warning {{
+            background-color: #ffc107;
+            color: black;
+        }}
         .btn-container {{
             margin-top: 20px;
         }}
@@ -107,13 +114,23 @@ def get_page(content):
         .project-actions {{
             margin-top: 10px;
         }}
+        .teacher-badge {{
+            background-color: #ffc107;
+            color: black;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.8em;
+            margin-left: 10px;
+        }}
     </style>
 </head>
 <body>
     <div class="navbar">
         <a href="/">Учебные проекты</a>
         <div>
-            {'<span class="user-info">' + session.get('user_name', '') + '</span>' if 'user_email' in session else ''}
+            {'<span class="user-info">' + session.get('user_name', '') +
+             ('<span class="teacher-badge">Учитель</span>' if session.get('is_teacher') else '') +
+             '</span>' if 'user_email' in session else ''}
             {'<a href="/my-projects">Мои проекты</a>' if 'user_email' in session else ''}
             <a href="/about">О проекте</a>
             {'<a href="/logout">Выйти</a>' if 'user_email' in session else '<a href="/login">Войти</a>'}
@@ -127,10 +144,10 @@ def get_page(content):
 """
 
 
-def save_user(name, email, password):
+def save_user(name, email, password, role='student'):
     """Сохраняет данные пользователя в файл"""
     with open(USERS_FILE, 'a') as f:
-        f.write(f"{name},{email},{generate_password_hash(password)}\n")
+        f.write(f"{name},{email},{generate_password_hash(password)},{role}\n")
 
 
 def user_exists(email):
@@ -150,20 +167,24 @@ def user_exists(email):
 def authenticate_user(email, password):
     """Аутентифицирует пользователя"""
     if not os.path.exists(USERS_FILE):
-        return False
+        return None
 
     with open(USERS_FILE, 'r') as f:
         for line in f:
             if line.strip():
                 parts = line.strip().split(',')
-                if len(parts) >= 3 and parts[1] == email:
+                if len(parts) >= 4 and parts[1] == email:
                     if check_password_hash(parts[2], password):
-                        return parts[0]  # Возвращаем имя  пользователя
-    return False
+                        return {
+                            'name': parts[0],
+                            'email': parts[1],
+                            'is_teacher': parts[3] == 'teacher'
+                        }
+    return None
 
 
 def save_project(title, description, author_email):
-    """Сохраняет проект в файл и возвращает ID проекта"""
+    """Сохраняет проект в файл"""
     project_id = str(len(open(PROJECTS_FILE).readlines()) + 1)
     with open(PROJECTS_FILE, 'a') as f:
         f.write(f"{project_id}|{title}|{description}|{author_email}\n")
@@ -187,6 +208,22 @@ def get_user_projects(email):
     return projects
 
 
+def get_all_students():
+    """Получает список всех студентов"""
+    students = []
+    if os.path.exists(USERS_FILE):
+        with open(USERS_FILE, 'r') as f:
+            for line in f:
+                if line.strip():
+                    parts = line.strip().split(',')
+                    if len(parts) >= 4 and parts[3] == 'student':
+                        students.append({
+                            'name': parts[0],
+                            'email': parts[1]
+                        })
+    return students
+
+
 def delete_project(project_id, user_email):
     """Удаляет проект пользователя"""
     if not os.path.exists(PROJECTS_FILE):
@@ -206,17 +243,24 @@ def delete_project(project_id, user_email):
     if deleted:
         with open(PROJECTS_FILE, 'w') as f:
             f.writelines(lines)
-
     return deleted
 
 
 @app.route('/')
 def home():
     if 'user_email' in session:
+        teacher_buttons = ""
+        if session.get('is_teacher'):
+            teacher_buttons = """
+            <div class="btn-container">
+                <a href="/manage-students" class="btn btn-warning">Управление студентами</a>
+            </div>
+            """
+
         content = f"""
         <h1>Добро пожаловать, {session['user_name']}!</h1>
         <p>Вы вошли как {session['user_email']}</p>
-
+        {teacher_buttons}
         <div class="btn-container">
             <a href="/new-project" class="btn">Новый проект</a>
             <a href="/my-projects" class="btn btn-secondary">Мои проекты</a>
@@ -226,10 +270,10 @@ def home():
         content = """
         <h1>Онлайн-платформа для управления учебными проектами</h1>
         <p>Упрощаем процесс управления проектами для студентов и преподавателей.</p>
-
         <div class="btn-container">
             <a href="/login" class="btn">Войти</a>
-            <a href="/register" class="btn btn-secondary">Зарегистрироваться</a>
+            <a href="/register" class="btn btn-secondary">Регистрация студента</a>
+            <a href="/register-teacher" class="btn btn-warning">Регистрация учителя</a>
         </div>
         """
 
@@ -252,6 +296,7 @@ def about():
         <li>Создание и отслеживание проектов</li>
         <li>Распределение задач между участниками</li>
         <li>Контроль сроков выполнения</li>
+        <li>Разделение прав доступа для студентов и учителей</li>
     </ul>
     <div style="margin-top: 20px;">
         <a href="/" class="btn">На главную</a>
@@ -270,10 +315,11 @@ def login():
         email = request.form['email']
         password = request.form['password']
 
-        user_name = authenticate_user(email, password)
-        if user_name:
-            session['user_email'] = email
-            session['user_name'] = user_name
+        user = authenticate_user(email, password)
+        if user:
+            session['user_email'] = user['email']
+            session['user_name'] = user['name']
+            session['is_teacher'] = user['is_teacher']
             return redirect(url_for('home'))
         else:
             message = '<div class="alert alert-danger">Неверный email или пароль</div>'
@@ -303,6 +349,7 @@ def login():
 def logout():
     session.pop('user_email', None)
     session.pop('user_name', None)
+    session.pop('is_teacher', None)
     return redirect(url_for('home'))
 
 
@@ -320,12 +367,12 @@ def register():
         if user_exists(email):
             message = '<div class="alert alert-danger">Пользователь с таким email уже зарегистрирован!</div>'
         else:
-            save_user(name, email, password)
-            message = f'<div class="alert alert-success">Пользователь {name} успешно зарегистрирован!</div>'
+            save_user(name, email, password, 'student')
+            message = f'<div class="alert alert-success">Студент {name} успешно зарегистрирован!</div>'
             return redirect(url_for('login'))
 
     content = f"""
-    <h1>Регистрация</h1>
+    <h1>Регистрация студента</h1>
     {message}
     <form method="POST" style="max-width: 400px; margin: 0 auto; text-align: left;">
         <div style="margin-bottom: 15px;">
@@ -344,6 +391,111 @@ def register():
     </form>
     <div style="margin-top: 20px;">
         <a href="/" class="btn btn-secondary">На главную</a>
+    </div>
+    """
+    return get_page(content)
+
+
+@app.route('/register-teacher', methods=['GET', 'POST'])
+def register_teacher():
+    if 'user_email' in session:
+        return redirect(url_for('home'))
+
+    message = ''
+    if request.method == 'POST':
+        name = request.form['name']
+        email = request.form['email']
+        password = request.form['password']
+        secret_code = request.form.get('secret_code', '')
+
+        if secret_code != "TEACHER123":
+            message = '<div class="alert alert-danger">Неверный код доступа для учителей!</div>'
+        elif user_exists(email):
+            message = '<div class="alert alert-danger">Пользователь с таким email уже зарегистрирован!</div>'
+        else:
+            save_user(name, email, password, 'teacher')
+            message = f'<div class="alert alert-success">Учитель {name} успешно зарегистрирован!</div>'
+            return redirect(url_for('login'))
+
+    content = f"""
+    <h1>Регистрация учителя</h1>
+    {message}
+    <form method="POST" style="max-width: 400px; margin: 0 auto; text-align: left;">
+        <div style="margin-bottom: 15px;">
+            <label for="name">Имя:</label><br>
+            <input type="text" id="name" name="name" style="width: 100%; padding: 8px;" required>
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label for="email">Email:</label><br>
+            <input type="email" id="email" name="email" style="width: 100%; padding: 8px;" required>
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label for="password">Пароль:</label><br>
+            <input type="password" id="password" name="password" style="width: 100%; padding: 8px;" required>
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label for="secret_code">Секретный код:</label><br>
+            <input type="password" id="secret_code" name="secret_code" style="width: 100%; padding: 8px;" required>
+        </div>
+        <button type="submit" class="btn btn-warning" style="width: 100%;">Зарегистрироваться как учитель</button>
+    </form>
+    <div style="margin-top: 20px;">
+        <a href="/" class="btn btn-secondary">На главную</a>
+    </div>
+    """
+    return get_page(content)
+
+
+@app.route('/manage-students')
+def manage_students():
+    if 'user_email' not in session or not session.get('is_teacher'):
+        return redirect(url_for('home'))
+
+    students = get_all_students()
+    students_html = ""
+
+    for student in students:
+        students_html += f"""
+        <div class="project-card">
+            <h3>{student['name']}</h3>
+            <p>{student['email']}</p>
+            <div class="project-actions">
+                <a href="/view-student-projects/{student['email']}" class="btn">Просмотреть проекты</a>
+            </div>
+        </div>
+        """
+
+    content = f"""
+    <h1>Управление студентами</h1>
+    {students_html if students else '<p>Нет зарегистрированных студентов</p>'}
+    <div style="margin-top: 20px;">
+        <a href="/" class="btn btn-secondary">На главную</a>
+    </div>
+    """
+    return get_page(content)
+
+
+@app.route('/view-student-projects/<student_email>')
+def view_student_projects(student_email):
+    if 'user_email' not in session or not session.get('is_teacher'):
+        return redirect(url_for('home'))
+
+    projects = get_user_projects(student_email)
+    projects_html = ""
+
+    for project in projects:
+        projects_html += f"""
+        <div class="project-card">
+            <h3>{project['title']}</h3>
+            <p>{project['description']}</p>
+        </div>
+        """
+
+    content = f"""
+    <h1>Проекты студента {student_email}</h1>
+    {projects_html if projects else '<p>У студента пока нет проектов</p>'}
+    <div style="margin-top: 20px;">
+        <a href="/manage-students" class="btn btn-secondary">Назад к списку студентов</a>
     </div>
     """
     return get_page(content)
@@ -396,7 +548,6 @@ def project_created():
     <div class="alert alert-success">
         Ваш проект был сохранен в системе. Теперь вы можете:
     </div>
-
     <div class="btn-container">
         <a href="/my-projects" class="btn">Посмотреть мои проекты</a>
         <a href="/new-project" class="btn">Создать еще один проект</a>
@@ -462,7 +613,6 @@ def edit_project(project_id):
     if 'user_email' not in session:
         return redirect(url_for('login'))
 
-    # Находим проект
     project = None
     if os.path.exists(PROJECTS_FILE):
         with open(PROJECTS_FILE, 'r') as f:
@@ -486,7 +636,6 @@ def edit_project(project_id):
         description = request.form['description']
 
         if title and description:
-            # Обновляем проект
             lines = []
             updated = False
             with open(PROJECTS_FILE, 'r') as f:
