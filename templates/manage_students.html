@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Управление студентами</h1>
+    {% if students %}
+        {% for student in students %}
+            <div class="project-card">
+                <h3>{{ student.name }}</h3>
+                <p>{{ student.email }}</p>
+                <div class="project-actions">
+                    <a href="/view-student-projects/{{ student.email }}" class="btn">Просмотреть проекты</a>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>Нет зарегистрированных студентов</p>
+    {% endif %}
+    <div style="margin-top: 20px;">
+        <a href="/" class="btn btn-secondary">На главную</a>
+    </div>
+{% endblock %}

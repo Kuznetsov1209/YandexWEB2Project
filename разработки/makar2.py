@@ -5,14 +5,14 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'
-port = int(os.environ.get("PORT", 3000))
+port = int(os.environ.get("PORT", 8080))
 
 # Пути к файлам
-USERS_FILE = 'data/users.txt'
-PROJECTS_FILE = 'data/projects.txt'
+USERS_FILE = '../data/users.txt'
+PROJECTS_FILE = '../data/projects.txt'
 
 # Создаем файлы, если их нет
-os.makedirs('data', exist_ok=True)
+os.makedirs('../data', exist_ok=True)
 for file in [USERS_FILE, PROJECTS_FILE]:
     if not os.path.exists(file):
         with open(file, 'w') as f:

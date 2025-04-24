@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+    {% if 'user_email' in session %}
+        <h1>Добро пожаловать, {{ user_name }}!</h1>
+        <p>Вы вошли как {{ user_email }}</p>
+        {{ teacher_buttons | safe }}
+        <div class="btn-container">
+            <a href="/new-project" class="btn">Новый проект</a>
+            <a href="/my-projects" class="btn btn-secondary">Мои проекты</a>
+        </div>
+    {% else %}
+        <h1>Онлайн-платформа для управления учебными проектами</h1>
+        <p>Упрощаем процесс управления проектами для студентов и преподавателей.</p>
+        <div class="btn-container">
+            <a href="/login" class="btn">Войти</a>
+            <a href="/register" class="btn btn-secondary">Регистрация студента</a>
+            <a href="/register-teacher" class="btn btn-warning">Регистрация учителя</a>
+        </div>
+    {% endif %}
+    <div style="margin-top: 30px;">
+        <a href="/about" class="btn">Узнать больше о проекте</a>
+    </div>
+{% endblock %}

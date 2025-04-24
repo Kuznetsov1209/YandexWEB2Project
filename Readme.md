@@ -31,7 +31,7 @@ pip install -r requirements.txt
 
 2. Запустите приложение:
 ```bash
-python app.py
+python makar2.py
 ```
 
 3. Откройте в браузере:

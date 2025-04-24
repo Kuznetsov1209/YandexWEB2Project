@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Создать новый проект</h1>
+    {% if message %}
+        <div class="alert alert-danger">{{ message }}</div>
+    {% endif %}
+    <form method="POST">
+        <div style="margin-bottom: 15px;">
+            <label for="title">Название проекта:</label><br>
+            <input type="text" id="title" name="title" required>
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label for="description">Описание проекта:</label><br>
+            <textarea id="description" name="description" rows="4" required></textarea>
+        </div>
+        <button type="submit" class="btn">Создать проект</button>
+    </form>
+    <div style="margin-top: 20px;">
+        <a href="/" class="btn btn-secondary">На главную</a>
+    </div>
+{% endblock %}

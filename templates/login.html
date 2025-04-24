@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Вход в систему</h1>
+    {% if message %}
+        <div class="alert alert-danger">{{ message }}</div>
+    {% endif %}
+    <form method="POST" style="max-width: 400px; margin: 0 auto; text-align: left;">
+        <div style="margin-bottom: 15px;">
+            <label for="email">Email:</label><br>
+            <input type="email" id="email" name="email" style="width: 100%; padding: 8px;" required>
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label for="password">Пароль:</label><br>
+            <input type="password" id="password" name="password" style="width: 100%; padding: 8px;" required>
+        </div>
+        <button type="submit" class="btn" style="width: 100%;">Войти</button>
+    </form>
+    <div style="margin-top: 20px;">
+        <a href="/" class="btn btn-secondary">На главную</a>
+    </div>
+{% endblock %}

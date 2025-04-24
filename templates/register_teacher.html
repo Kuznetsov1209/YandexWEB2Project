@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Регистрация учителя</h1>
+    {% if message %}
+        <div class="alert alert-danger">{{ message }}</div>
+    {% endif %}
+    <form method="POST" style="max-width: 400px; margin: 0 auto; text-align: left;">
+        <div style="margin-bottom: 15px;">
+            <label for="name">Имя:</label><br>
+            <input type="text" id="name" name="name" style="width: 100%; padding: 8px;" required>
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label for="email">Email:</label><br>
+            <input type="email" id="email" name="email" style="width: 100%; padding: 8px;" required>
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label for="password">Пароль:</label><br>
+            <input type="password" id="password" name="password" style="width: 100%; padding: 8px;" required>
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label for="secret_code">Секретный код:</label><br>
+            <input type="password" id="secret_code" name="secret_code" style="width: 100%; padding: 8px;" required>
+        </div>
+        <button type="submit" class="btn btn-warning" style="width: 100%;">Зарегистрироваться как учитель</button>
+    </form>
+    <div style="margin-top: 20px;">
+        <a href="/" class="btn btn-secondary">На главную</a>
+    </div>
+{% endblock %}

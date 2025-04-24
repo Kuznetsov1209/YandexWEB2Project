@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Учебные проекты</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="navbar">
+        <a href="{{ url_for('home') }}">Учебные проекты</a>
+        <div>
+            {% if 'user_email' in session %}
+                <span class="user-info">{{ session['user_name'] }}
+                    {% if session.get('is_teacher') %}
+                        <span class="teacher-badge">Учитель</span>
+                    {% endif %}
+                </span>
+                <a href="{{ url_for('my_projects') }}">Мои проекты</a>
+            {% endif %}
+            <a href="{{ url_for('about') }}">О проекте</a>
+            {% if 'user_email' in session %}
+                <a href="{{ url_for('logout') }}">Выйти</a>
+            {% else %}
+                <a href="{{ url_for('login') }}">Войти</a>
+            {% endif %}
+        </div>
+    </div>
+    <div class="content">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

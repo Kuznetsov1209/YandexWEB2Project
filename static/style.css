@@ -1,0 +1,113 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f9;
+    color: #333;
+}
+
+.navbar {
+    background-color: #007bff;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.navbar a {
+    color: white;
+    text-decoration: none;
+    margin: 0 15px;
+}
+
+.content {
+    padding: 20px;
+    max-width: 800px;
+    margin: 20px auto;
+    text-align: center;
+}
+
+.btn {
+    background-color: #28a745;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 5px;
+    text-decoration: none;
+    display: inline-block;
+    margin: 10px 5px;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+}
+
+.btn-warning {
+    background-color: #ffc107;
+    color: black;
+}
+
+.btn-container {
+    margin-top: 20px;
+}
+
+.alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+
+.alert-success {
+    color: #3c763d;
+    background-color: #dff0d8;
+    border-color: #d6e9c6;
+}
+
+.alert-danger {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
+
+form {
+    max-width: 500px;
+    margin: 0 auto;
+    text-align: left;
+}
+
+input, textarea {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.user-info {
+    color: white;
+    margin-right: 15px;
+}
+
+.project-card {
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    text-align: left;
+}
+
+.project-actions {
+    margin-top: 10px;
+}
+
+.teacher-badge {
+    background-color: #ffc107;
+    color: black;
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-size: 0.8em;
+    margin-left: 10px;
+}
