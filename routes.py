@@ -1,5 +1,5 @@
 from flask import render_template, request, redirect, url_for, session, flash
-from main import app, USERS_FILE, PROJECTS_FILE
+from server import app, USERS_FILE, PROJECTS_FILE
 import os
 from werkzeug.security import generate_password_hash, check_password_hash
 
