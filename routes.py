@@ -5,7 +5,7 @@ import os  # Для работы с файловой системой
 from werkzeug.security import generate_password_hash, check_password_hash  # Для хеширования паролей
 
 
-# Функция для сохранения нового пользователя
+#  Функция для сохранения нового пользователя
 def save_user(name, email, password, role='student'):
     """
     Сохраняет данные пользователя в файл USERS_FILE
